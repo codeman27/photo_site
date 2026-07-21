@@ -1,0 +1,43 @@
+name: Sync Instagram photos
+
+# Daily profile check: re-fetches the creator's full media list, re-parses
+# every caption for hashtags, and commits data/images.json ONLY when
+# something actually changed (new posts, removals, caption/tag edits).
+# If the token expires, the sync step fails and GitHub emails the repo owner —
+# the site keeps running from the last committed data/images.json.
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # once a day, 13:00 UTC
+  workflow_dispatch: # manual "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Sync data/images.json from Instagram
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: node scripts/sync.js
+
+      - name: Commit updated data/images.json
+        run: |
+          if git diff --quiet -- data/images.json; then
+            echo "No changes on the profile — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/images.json
+          git commit -m "Sync Instagram photos ($(date -u +%Y-%m-%d))"
+          git push

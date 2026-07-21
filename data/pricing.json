@@ -1,0 +1,46 @@
+{
+  "note": "Edit this file to update pricing. Changes deploy with the site.",
+  "packages": [
+    {
+      "name": "Mini Session",
+      "price": "$150",
+      "description": "A quick, fun session perfect for updated portraits or small families.",
+      "features": [
+        "30-minute session",
+        "1 location",
+        "15 edited digital images",
+        "Online gallery delivery",
+        "Print release"
+      ],
+      "highlighted": false
+    },
+    {
+      "name": "Full Session",
+      "price": "$300",
+      "description": "The complete experience for families, maternity, engagements, or portraits.",
+      "features": [
+        "60-minute session",
+        "Up to 2 locations",
+        "40 edited digital images",
+        "Online gallery delivery",
+        "Print release",
+        "Outfit change included"
+      ],
+      "highlighted": true
+    },
+    {
+      "name": "Wedding",
+      "price": "From $1,800",
+      "description": "Full-day coverage of your big day, from getting ready to the last dance.",
+      "features": [
+        "Up to 8 hours of coverage",
+        "Second shooter available",
+        "400+ edited digital images",
+        "Engagement session included",
+        "Online gallery delivery",
+        "Print release"
+      ],
+      "highlighted": false
+    }
+  ]
+}

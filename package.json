@@ -1,0 +1,12 @@
+{
+  "name": "rawbe-photography-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static photography portfolio for @rawbe_photography_llc with daily Instagram auto-sync and two switchable themes.",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync.js",
+    "sync:check": "node scripts/sync.js --dry-run",
+    "serve": "python3 -m http.server 8080"
+  }
+}
