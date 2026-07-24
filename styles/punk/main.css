@@ -564,6 +564,34 @@ img {
   letter-spacing: 0.1em;
 }
 
+.social-links {
+  margin: 0 0 0.5rem;
+}
+
+.social-link {
+  display: inline-block;
+  color: var(--color-accent-2);
+  line-height: 0;
+}
+
+.social-link:hover {
+  color: var(--color-accent);
+}
+
+.footer-admin {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+}
+
+.admin-link {
+  color: var(--color-text-muted);
+  text-decoration: underline wavy;
+}
+
+.admin-link:hover {
+  color: var(--color-accent);
+}
+
 /* ---------- Lightbox ---------- */
 
 .lightbox {

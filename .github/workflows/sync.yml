@@ -1,10 +1,10 @@
-name: Sync Instagram photos
+name: Sync Nostr photos
 
-# Daily profile check: re-fetches the creator's full media list, re-parses
-# every caption for hashtags, and commits data/images.json ONLY when
-# something actually changed (new posts, removals, caption/tag edits).
-# If the token expires, the sync step fails and GitHub emails the repo owner —
-# the site keeps running from the last committed data/images.json.
+# Daily relay check: re-fetches the creator's full photo list (NIP-94 kind-1063
+# events), and commits data/images.json ONLY when something actually changed
+# (new photos, removals, caption/tag edits).
+# There are no tokens and no secrets — reading public Nostr events needs no
+# credentials, so this workflow can never lock itself out.
 
 on:
   schedule:
@@ -13,6 +13,12 @@ on:
 
 permissions:
   contents: write
+
+# Serialize runs: a manual dispatch overlapping the cron (or two dispatches)
+# must not race the commit+push step.
+concurrency:
+  group: sync-images
+  cancel-in-progress: false
 
 jobs:
   sync:
@@ -23,21 +29,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
-      - name: Sync data/images.json from Instagram
-        env:
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-          IG_USER_ID: ${{ secrets.IG_USER_ID }}
-        run: node scripts/sync.js
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync data/images.json from Nostr relays
+        run: node scripts/sync-nostr.js
 
       - name: Commit updated data/images.json
         run: |
           if git diff --quiet -- data/images.json; then
-            echo "No changes on the profile — nothing to commit."
+            echo "No changes on the relays — nothing to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/images.json
-          git commit -m "Sync Instagram photos ($(date -u +%Y-%m-%d))"
+          git commit -m "Sync Nostr photos ($(date -u +%Y-%m-%d))"
+          # A human push may have landed between checkout and push.
+          git pull --rebase
           git push

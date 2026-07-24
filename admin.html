@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Creator Upload — RawBe Photography</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23222'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles/admin.css">
+  <script type="module" src="scripts/admin.js"></script>
+</head>
+<body>
+  <header class="admin-header">
+    <h1>RawBe Photography — Creator Upload</h1>
+    <a class="back-link" href="index.html">&larr; Back to site</a>
+  </header>
+
+  <main class="admin-main">
+    <p id="config-warning" class="banner banner-warn" hidden></p>
+
+    <!-- Step 1: identity -->
+    <section class="card" id="identity-card">
+      <h2>1. Identify yourself</h2>
+      <p class="muted">
+        Uploads are signed with your Nostr key. The site only displays photos
+        published by the creator key configured in <code>data/nostr.json</code>,
+        so nobody else can add photos.
+      </p>
+      <div id="signer-options">
+        <button id="nip07-login" class="btn" type="button" hidden>
+          Use browser signer extension (recommended)
+        </button>
+        <details id="nsec-details">
+          <summary>Paste nsec key instead</summary>
+          <p class="muted small">
+            Your key is kept in memory only — it is never written to storage
+            and is forgotten when this tab closes (you'll paste it again next
+            session). A signer extension (Alby, nos2x) is safer and more
+            convenient: the key never touches the page at all, and sign-in is
+            remembered between visits.
+          </p>
+          <div class="nsec-row">
+            <input id="nsec-input" type="password" placeholder="nsec1..." autocomplete="off">
+            <button id="nsec-login" class="btn" type="button">Use this key</button>
+          </div>
+        </details>
+      </div>
+      <div id="identity-status" class="identity-status" hidden>
+        <p>Signed in as <code id="identity-npub"></code></p>
+        <p id="identity-match" class="banner" hidden></p>
+        <button id="logout" class="btn btn-small" type="button">Forget this key</button>
+      </div>
+    </section>
+
+    <!-- Step 2: drop photos -->
+    <section class="card" id="drop-card" hidden>
+      <h2>2. Drop photos onto a section</h2>
+      <p class="muted">Drag files onto a tile (or click it to browse). You can caption them in the next step.</p>
+      <div id="section-tiles" class="section-tiles"></div>
+    </section>
+
+    <!-- Step 3: caption + publish -->
+    <section class="card" id="queue-card" hidden>
+      <h2>3. Caption &amp; publish</h2>
+      <div id="queue-list" class="queue-list"></div>
+      <div class="queue-actions">
+        <button id="publish-all" class="btn btn-primary" type="button">Publish photos</button>
+        <button id="clear-done" class="btn" type="button">Clear finished</button>
+      </div>
+    </section>
+
+    <section class="card" id="log-card" hidden>
+      <h2>Activity log</h2>
+      <pre id="log" class="log"></pre>
+    </section>
+
+    <p class="muted small">
+      Published photos appear on the site after the next sync (runs daily, or the
+      site owner can trigger it from GitHub &rarr; Actions &rarr; "Sync Nostr photos").
+    </p>
+  </main>
+</body>
+</html>

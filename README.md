@@ -1,77 +1,89 @@
 # RawBe Photography — Portfolio Site
 
-Static photography portfolio for [@rawbe_photography_llc](https://www.instagram.com/rawbe_photography_llc/).
-No framework, no build step — plain HTML/CSS/JS. Content auto-syncs from Instagram
-once a day; hashtags on posts decide where each photo appears on the site.
+Static photography portfolio. No framework, no build step — plain HTML/CSS/JS.
+Photos are uploaded by the creator through the site's own upload page and stored
+on **Nostr Blossom servers**; the photo index lives on **Nostr relays**. There
+are **no API keys and nothing expires** — the creator's Nostr key is the only
+credential.
 
-## How the Instagram sync works (the "check the profile once a day" piece)
+## How photo publishing works
 
-There is no supported way to pull photos from a public Instagram profile
-anonymously — scraping violates Instagram's terms and breaks constantly. The
-reliable mechanism is the **Instagram Graph API** plus a **scheduled job**:
+1. The creator opens **`admin.html`** on the site (footer → "Creator upload")
+   and signs in with their Nostr key — a signer extension (Alby, nos2x) is
+   recommended (the key never touches the page, and sign-in is remembered),
+   or they can paste their `nsec` (kept **in memory only**, forgotten when the
+   tab closes).
+2. They drag photos onto section tiles (Weddings, Family, …). For each photo
+   the page:
+   - validates the format (JPEG, PNG, WebP, AVIF, GIF, APNG only) and
+     downscales it to web size (max 2560px; already-small files pass through),
+   - signs a Blossom authorization event (kind 24242) and `PUT`s the file to
+     every configured Blossom server (mirrors, for redundancy). Returned URLs
+     are only trusted when they contain the file's SHA-256 (content
+     addressing) — otherwise the canonical `/<sha256><ext>` URL is used,
+   - signs a NIP-94 file-metadata event (kind 1063) with the URLs, hash, mime
+     type, caption and section hashtag, and publishes it to public relays.
 
-1. The creator switches their account to a free **Creator (or Business) account**
-   in the Instagram app (Settings → Account → Switch to professional account).
-2. One-time authorization produces a **long-lived access token** (~60 days).
-3. A GitHub Action (`.github/workflows/sync.yml`) runs `scripts/sync.js`
-   **once a day**. Every run re-fetches the creator's *entire* media list and
-   re-parses *every* caption for hashtags, so it picks up:
-   - new posts,
-   - deleted posts,
-   - edited captions / changed hashtags (a photo can move sections without reposting).
-4. The Action commits `data/images.json` **only when something changed** — quiet
-   days produce zero commits. If your host (Netlify/Vercel/GitHub Pages) deploys
-   on push, the site updates itself.
-5. If the API call fails (expired token, outage), the existing `data/images.json`
-   is left untouched: the site keeps working from the last good data, and the
-   failed Action emails the repo owner.
+   The upload page loads **no third-party code**: nostr-tools is vendored at
+   `scripts/vendor/nostr-tools.js` (nostr-tools 2.24.1, sha256
+   `c400eab94bdfcc29b733ac8066a0731581e36c73316a4e062ad0a51779804e92`). If you
+   ever update it, re-download from a trusted source, verify the hash, and
+   keep it pinned — never swap it for a CDN URL.
+3. A GitHub Action (`.github/workflows/sync.yml`) runs `scripts/sync-nostr.js`
+   **once a day**. It reads the creator's public kind-1063 events from the
+   relays and rebuilds `data/images.json`. Reading public Nostr events needs
+   **no credentials at all**, which is why there is no token to renew.
+4. The Action commits `data/images.json` **only when something changed**. If
+   your host (Netlify/Vercel/GitHub Pages) deploys on push, the site updates
+   itself. To publish immediately, use Actions → "Sync Nostr photos" → Run.
+5. If the relay fetch fails or returns nothing, the existing `data/images.json`
+   is left untouched: the site keeps working from the last good data.
 
-### One-time Instagram API setup
+### Access control
 
-1. Convert the IG account to Creator/Business (above).
-2. Create an app at [developers.facebook.com](https://developers.facebook.com/),
-   add the **Instagram** product (Instagram API with Instagram Login).
-3. Add the creator's Instagram account in the app dashboard and generate an
-   access token with the `instagram_business_basic` permission.
-4. Exchange it for a **long-lived token** (60 days) — see
-   [Instagram Platform docs](https://developers.facebook.com/docs/instagram-platform).
-5. Add the token to the GitHub repo: **Settings → Secrets and variables →
-   Actions → New repository secret** named `IG_ACCESS_TOKEN`.
-   (Optional: `IG_USER_ID` — the numeric IG user id; defaults to `me`.)
+The site only renders events authored by the creator pubkey configured in
+`data/nostr.json`. Anyone can open the upload page, but photos signed by any
+other key never appear on the site — **the key is the permission system**.
 
-**Token renewal:** long-lived tokens expire after ~60 days. Before then, either
-re-generate one the same way, or call:
+### One-time setup
 
-```
-curl "https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=YOUR_CURRENT_TOKEN"
-```
+1. Get the creator's **npub** (from their Nostr client profile, or derive it
+   from the `nsec` with any key tool).
+2. Put it in `data/nostr.json`:
+   ```json
+   { "pubkey": "npub1..." }
+   ```
+3. Optionally adjust the `relays` and `blossomServers` lists in the same file.
+   All listed Blossom servers receive every upload (mirroring); all listed
+   relays receive every metadata event.
+4. Commit and deploy. No secrets to configure anywhere — including in GitHub.
 
-and update the `IG_ACCESS_TOKEN` secret with the new value. If the token lapses,
-the daily Action fails loudly (email) and the site keeps showing the last sync.
+### `data/nostr.json` reference
+
+| Field            | Purpose                                                        |
+|------------------|----------------------------------------------------------------|
+| `pubkey`         | Creator's npub (or 64-char hex). The only key the site reads.  |
+| `relays`         | Nostr relays for publishing/reading metadata events.           |
+| `blossomServers` | Blossom servers that store the actual image files.             |
+| `sections`       | Upload-page tiles. `tag` must match `GALLERY_SECTIONS` in `scripts/main.js`. |
 
 ### Running the sync by hand
 
 ```bash
-export IG_ACCESS_TOKEN=your_long_lived_token
-npm run sync          # fetch and write data/images.json
-npm run sync:check    # dry run: report what would change, write nothing
+npm install          # once (installs nostr-tools; requires Node 22+)
+npm run sync         # fetch relays and write data/images.json
+npm run sync:check   # dry run: report what would change, write nothing
 ```
 
-### Hashtag conventions for the creator
+### Adding a new gallery section
 
-Post to Instagram normally; hashtags in the caption place the photo:
-
-| Hashtag              | Appears in            |
-|----------------------|-----------------------|
-| `#portfolio-carousel`| Hero carousel         |
-| `#wedding`           | Weddings gallery      |
-| `#family`            | Family gallery        |
-| `#portrait`          | Portraits gallery     |
-| `#maternity`         | Maternity gallery     |
-
-Tags can be combined (a wedding shot can also be in the carousel). Editing a
-caption's hashtags later works too — the next daily sync re-reads them. To add a
-new gallery section, add one entry to `GALLERY_SECTIONS` in `scripts/main.js`.
+Add one entry to `sections` in `data/nostr.json` — that's the single source of
+truth. The upload page gets a new tile and the site renders a new gallery
+automatically (`scripts/main.js` derives its section list from the same file,
+falling back to built-in defaults if it can't be loaded). The section tagged
+`portfolio-carousel` feeds the hero carousel instead of a gallery. The sync
+script warns if a synced photo carries a tag that matches no section (a photo
+that would never render).
 
 ## Running the site locally
 
@@ -83,8 +95,9 @@ npm run serve        # python3 -m http.server 8080
 # or: npx serve .
 ```
 
-Then open http://localhost:8080. Out of the box it renders sample placeholder
-photos from `data/images.json`; the first successful sync replaces them.
+Then open http://localhost:8080 (and `/admin.html` for the upload page).
+Out of the box it renders sample placeholder photos from `data/images.json`;
+the first successful Nostr sync replaces them.
 
 ## Themes
 
@@ -92,6 +105,7 @@ Two complete themes live in `styles/classic/` (elegant, default) and
 `styles/punk/` (dark tattoo/punk). The header toggle swaps the stylesheet and
 remembers the choice in `localStorage`. Both files must keep defining the same
 selectors — when editing one theme, mirror the selector in the other.
+The upload page has its own theme-independent stylesheet (`styles/admin.css`).
 
 ## Pricing & contact form
 
@@ -104,24 +118,42 @@ selectors — when editing one theme, mirror the selector in the other.
 
 ```
 ├── index.html                  # single-page site
+├── admin.html                  # creator upload page (drag & drop)
 ├── data/
 │   ├── images.json             # single source of truth for photos (synced)
+│   ├── nostr.json              # creator pubkey, relays, blossom servers, sections
 │   └── pricing.json            # pricing packages (manual)
 ├── scripts/
-│   ├── sync.js                 # Instagram -> images.json sync (Node 18+, no deps)
+│   ├── admin.js                # upload page logic (blossom PUT + kind-1063 publish)
+│   ├── vendor/nostr-tools.js   # pinned nostr-tools bundle for the upload page (no CDN)
+│   ├── sync-nostr.js           # relays -> images.json sync (Node 22+, nostr-tools)
+│   ├── sync.js                 # legacy Instagram sync (deprecated, manual use only)
 │   └── main.js                 # theme toggle, carousel, galleries, lightbox, pricing
 ├── styles/
 │   ├── classic/main.css        # default professional theme
-│   └── punk/main.css           # punk/tattoo theme (same selectors)
-├── .github/workflows/sync.yml  # daily scheduled sync
+│   ├── punk/main.css           # punk/tattoo theme (same selectors)
+│   └── admin.css               # upload page styles (theme-independent)
+├── .github/workflows/sync.yml  # daily scheduled sync (no secrets)
 └── images/                     # static assets (og-image, etc.)
 ```
 
 ## Known risks / open items
 
-- **Image hotlinking:** the site embeds Instagram `media_url` CDN links directly.
-  These generally work, but Instagram CDN changes can break hotlinked images.
-  If that happens, the fix is to download the images into `images/` during sync
-  and reference local files instead (sync script would need that added).
-- **Token expiry:** see "Token renewal" above — roughly once every 60 days a
-  human refreshes the token unless/until the renewal call is automated.
+- **Free infrastructure persistence:** public Blossom servers and relays are
+  community-run. Uploads are mirrored to every configured Blossom server, and
+  `data/images.json` is committed after every sync, so the site itself never
+  breaks — but long-term archival of the original files depends on at least
+  one server keeping them. The site already fails over: if an image URL dies,
+  the page retries that photo's mirror URLs automatically. For guaranteed
+  permanence, run a self-hosted Blossom server later and add it to
+  `blossomServers`.
+- **Relay churn:** if all configured relays drop an event, the sync finds
+  nothing and (safely) does nothing. Keep 3–5 relays in `data/nostr.json`.
+- **nsec handling:** a pasted nsec lives only in page memory (never persisted)
+  and is forgotten when the tab closes. A signer extension is still the
+  better path — the key never enters the page and sign-in persists.
+- **Commit the lockfile:** the GitHub Action runs `npm ci` with npm caching —
+  `package-lock.json` must be committed alongside `package.json` or every
+  run fails at install.
+- **Legacy Instagram sync:** `scripts/sync.js` still exists for manual use
+  (`npm run sync:ig`, needs `IG_ACCESS_TOKEN`) but is no longer scheduled.

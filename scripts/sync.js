@@ -62,6 +62,7 @@ function normalizePost(media) {
   return {
     id: media.id,
     url: imageUrlFor(media),
+    mirrors: [], // schema parity with scripts/sync-nostr.js (Nostr mirrors)
     caption: media.caption || "",
     tags: extractTags(media.caption),
     permalink: media.permalink,

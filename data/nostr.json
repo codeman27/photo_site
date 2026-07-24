@@ -1,0 +1,22 @@
+{
+  "pubkey": "npub1REPLACE_WITH_THE_CREATORS_NPUB",
+  "relays": [
+    "wss://relay.damus.io",
+    "wss://nos.lol",
+    "wss://relay.primal.net",
+    "wss://nostr.mom",
+    "wss://relay.nostr.band"
+  ],
+  "blossomServers": [
+    "https://blossom.primal.net",
+    "https://cdn.satellite.earth",
+    "https://24242.io"
+  ],
+  "sections": [
+    { "tag": "portfolio-carousel", "title": "Hero Carousel" },
+    { "tag": "wedding", "title": "Weddings" },
+    { "tag": "family", "title": "Family" },
+    { "tag": "portrait", "title": "Portraits" },
+    { "tag": "maternity", "title": "Maternity" }
+  ]
+}
