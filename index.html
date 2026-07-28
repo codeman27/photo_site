@@ -65,11 +65,15 @@
       <p class="pricing-note">Custom packages available — just ask.</p>
     </section>
 
-    <!-- Contact: swap the form action for your own Formspree endpoint (see README.md) -->
+    <!-- Contact: handled by the Cloudflare Pages Function at /api/contact (see README.md) -->
     <section id="contact" class="contact">
       <h2 class="section-title">Get in Touch</h2>
       <p class="section-subtitle">Tell me about your day, your family, or your idea — let's make something real.</p>
-      <form class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <form id="contact-form" class="contact-form" action="/api/contact" method="POST">
+        <div class="form-honeypot" aria-hidden="true">
+          <label for="contact-website">Website</label>
+          <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
         <div class="form-row">
           <label for="contact-name">Name</label>
           <input id="contact-name" name="name" type="text" required autocomplete="name">
@@ -92,6 +96,7 @@
           <label for="contact-message">Message</label>
           <textarea id="contact-message" name="message" rows="5" required></textarea>
         </div>
+        <p id="contact-status" class="contact-status" role="status" hidden></p>
         <button class="btn btn-primary" type="submit">Send Message</button>
       </form>
     </section>

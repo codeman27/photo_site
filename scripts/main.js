@@ -318,6 +318,62 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* Contact form                                                        */
+  /* ------------------------------------------------------------------ */
+
+  function initContactForm() {
+    var form = document.getElementById("contact-form");
+    if (!form) return;
+    var status = document.getElementById("contact-status");
+    var submitBtn = form.querySelector("button[type=submit]");
+
+    function showStatus(text, ok) {
+      status.textContent = text;
+      status.hidden = false;
+      status.classList.toggle("contact-status-ok", ok);
+      status.classList.toggle("contact-status-err", !ok);
+    }
+
+    // No-JS flow: the Pages Function redirects back with ?contact=success|error.
+    var result = new URLSearchParams(window.location.search).get("contact");
+    if (result === "success") {
+      showStatus("Message sent — thanks! I'll get back to you soon.", true);
+    } else if (result === "error") {
+      showStatus("Something went wrong — please try again.", false);
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" },
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (data) {
+          if (data.ok) {
+            showStatus("Message sent — thanks! I'll get back to you soon.", true);
+            form.reset();
+          } else {
+            showStatus(data.error || "Something went wrong — please try again.", false);
+          }
+        })
+        .catch(function () {
+          showStatus("Network error — please try again.", false);
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Send Message";
+        });
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
   /* Pricing                                                             */
   /* ------------------------------------------------------------------ */
 
@@ -367,6 +423,7 @@
 
   initThemeToggle();
   initLightbox();
+  initContactForm();
   document.getElementById("footer-year").textContent = new Date().getFullYear();
 
   // data/nostr.json is optional for rendering: if it's missing or invalid we

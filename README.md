@@ -111,8 +111,24 @@ The upload page has its own theme-independent stylesheet (`styles/admin.css`).
 
 - **Pricing** comes from `data/pricing.json` — edit packages there and deploy.
   (`highlighted: true` marks the featured package.)
-- **Contact form** is wired for [Formspree](https://formspree.io/): create a free
-  form, then replace `YOUR_FORM_ID` in the `action` attribute in `index.html`.
+- **Contact form** is handled by a Cloudflare Pages Function
+  (`functions/api/contact.js`) which forwards messages via
+  [MailChannels](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels/)
+  — free with Cloudflare Pages, **no account or API key needed**.
+
+  **Setup (one time):**
+  1. Cloudflare Pages dashboard → your project → **Settings → Environment
+     variables** → add `CONTACT_EMAIL` = the address messages go to.
+  2. (Optional) add `FROM_EMAIL` for the sender address shown on the email.
+  3. (Recommended for deliverability) add an SPF record to your domain's DNS:
+     `v=spf1 include:relay.mailchannels.net ~all` — if you already have an SPF
+     record, merge `include:relay.mailchannels.net` into it instead.
+
+  The visitor's email is set as Reply-To, so you can answer straight from
+  your inbox. A hidden honeypot field drops basic bot submissions. The form
+  also works without JavaScript (the function redirects back with a status
+  message). Local testing: `npx wrangler pages dev .` with a `.dev.vars`
+  file containing `CONTACT_EMAIL=you@example.com` (`.dev.vars` is gitignored).
 
 ## File structure
 
@@ -127,7 +143,9 @@ The upload page has its own theme-independent stylesheet (`styles/admin.css`).
 │   ├── admin.js                # upload page logic (blossom PUT + kind-1063 publish)
 │   ├── vendor/nostr-tools.js   # pinned nostr-tools bundle for the upload page (no CDN)
 │   ├── sync-nostr.js           # relays -> images.json sync (Node 22+, nostr-tools)
-│   └── main.js                 # theme toggle, carousel, galleries, lightbox, pricing
+│   └── main.js                 # theme toggle, carousel, galleries, lightbox, pricing, contact form
+├── functions/
+│   └── api/contact.js          # Cloudflare Pages Function: contact form -> email (MailChannels)
 ├── styles/
 │   ├── classic/main.css        # default professional theme
 │   ├── punk/main.css           # punk/tattoo theme (same selectors)
