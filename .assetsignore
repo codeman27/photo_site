@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Git
+.git/
+
+# Docs / internal
+plans/
+*.md
+!README.md
+
+# CI
+.github/
+
+# Local config
+.kilo/
+.kilocode/
+.opencode/
+
+# Env / logs
+.env
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
