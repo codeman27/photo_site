@@ -470,6 +470,34 @@ img {
   align-self: center;
 }
 
+/* Honeypot: off-screen but present, so basic bots fill it in */
+.form-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact-status {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  text-align: center;
+  border: 1px solid transparent;
+}
+
+.contact-status-ok {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.contact-status-err {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
 /* ---------- Footer ---------- */
 
 .site-footer {
