@@ -127,7 +127,6 @@ The upload page has its own theme-independent stylesheet (`styles/admin.css`).
 │   ├── admin.js                # upload page logic (blossom PUT + kind-1063 publish)
 │   ├── vendor/nostr-tools.js   # pinned nostr-tools bundle for the upload page (no CDN)
 │   ├── sync-nostr.js           # relays -> images.json sync (Node 22+, nostr-tools)
-│   ├── sync.js                 # legacy Instagram sync (deprecated, manual use only)
 │   └── main.js                 # theme toggle, carousel, galleries, lightbox, pricing
 ├── styles/
 │   ├── classic/main.css        # default professional theme
@@ -155,5 +154,3 @@ The upload page has its own theme-independent stylesheet (`styles/admin.css`).
 - **Commit the lockfile:** the GitHub Action runs `npm ci` with npm caching —
   `package-lock.json` must be committed alongside `package.json` or every
   run fails at install.
-- **Legacy Instagram sync:** `scripts/sync.js` still exists for manual use
-  (`npm run sync:ig`, needs `IG_ACCESS_TOKEN`) but is no longer scheduled.

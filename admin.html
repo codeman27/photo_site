@@ -69,6 +69,21 @@
       </div>
     </section>
 
+    <!-- Manage published photos -->
+    <section class="card" id="manage-card" hidden>
+      <h2>Manage published photos</h2>
+      <p class="muted">
+        Photos you've published to the relays. Deleting removes the metadata
+        event from relays that honor NIP-09 deletion requests; the image files
+        on Blossom servers are content-addressed and may persist.
+      </p>
+      <div class="manage-actions">
+        <button id="load-photos" class="btn" type="button">Load published photos</button>
+        <span id="photos-count" class="muted small"></span>
+      </div>
+      <div id="photos-list" class="photos-list"></div>
+    </section>
+
     <section class="card" id="log-card" hidden>
       <h2>Activity log</h2>
       <pre id="log" class="log"></pre>
@@ -77,6 +92,7 @@
     <p class="muted small">
       Published photos appear on the site after the next sync (runs daily, or the
       site owner can trigger it from GitHub &rarr; Actions &rarr; "Sync Nostr photos").
+      Deleted photos disappear after the next sync.
     </p>
   </main>
 </body>

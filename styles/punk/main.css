@@ -536,22 +536,6 @@ img {
   align-self: center;
 }
 
-.contact-alt {
-  margin-top: 2rem;
-  text-align: center;
-  color: var(--color-text-muted);
-}
-
-.instagram-icon {
-  display: inline-block;
-  width: 1.1em;
-  height: 1.1em;
-  vertical-align: middle;
-  margin-right: 0.3em;
-  position: relative;
-  top: -0.1em;
-}
-
 /* ---------- Footer ---------- */
 
 .site-footer {
@@ -562,20 +546,6 @@ img {
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-}
-
-.social-links {
-  margin: 0 0 0.5rem;
-}
-
-.social-link {
-  display: inline-block;
-  color: var(--color-accent-2);
-  line-height: 0;
-}
-
-.social-link:hover {
-  color: var(--color-accent);
 }
 
 .footer-admin {

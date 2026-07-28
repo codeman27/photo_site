@@ -2,9 +2,9 @@
 /**
  * Nostr -> data/images.json sync script.
  *
- * Replaces the old Instagram Graph API sync. There are NO tokens and nothing
- * expires: photos are NIP-94 file-metadata events (kind 1063) published by the
- * creator's key, and reading public events from relays needs no credentials.
+ * There are NO tokens and nothing expires: photos are NIP-94 file-metadata
+ * events (kind 1063) published by the creator's key, and reading public events
+ * from relays needs no credentials.
  *
  * Every run re-fetches ALL of the creator's photo events and rebuilds the post
  * list, so it picks up new photos, caption edits, and changed section tags.

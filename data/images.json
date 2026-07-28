@@ -5,33 +5,33 @@
     {
       "id": "sample-carousel-1",
       "url": "https://picsum.photos/seed/rawbe-hero1/1600/900",
-      "caption": "Sample hero image. Replace by running scripts/sync.js with real Instagram credentials.",
+      "caption": "Sample hero image. Replace by publishing photos via the creator upload page.",
       "tags": ["portfolio-carousel"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-07-01T12:00:00+00:00"
     },
     {
       "id": "sample-carousel-2",
       "url": "https://picsum.photos/seed/rawbe-hero2/1600/900",
-      "caption": "Sample hero image. Replace by running scripts/sync.js with real Instagram credentials.",
+      "caption": "Sample hero image. Replace by publishing photos via the creator upload page.",
       "tags": ["portfolio-carousel"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-07-02T12:00:00+00:00"
     },
     {
       "id": "sample-carousel-3",
       "url": "https://picsum.photos/seed/rawbe-hero3/1600/900",
-      "caption": "Sample hero image. Replace by running scripts/sync.js with real Instagram credentials.",
+      "caption": "Sample hero image. Replace by publishing photos via the creator upload page.",
       "tags": ["portfolio-carousel"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-07-03T12:00:00+00:00"
     },
     {
       "id": "sample-carousel-4",
       "url": "https://picsum.photos/seed/rawbe-hero4/1600/900",
-      "caption": "Sample hero image. Replace by running scripts/sync.js with real Instagram credentials.",
+      "caption": "Sample hero image. Replace by publishing photos via the creator upload page.",
       "tags": ["portfolio-carousel"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-07-04T12:00:00+00:00"
     },
     {
@@ -39,7 +39,7 @@
       "url": "https://picsum.photos/seed/rawbe-wed1/800/1200",
       "caption": "Sample wedding photo.",
       "tags": ["wedding"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-06-01T12:00:00+00:00"
     },
     {
@@ -47,7 +47,7 @@
       "url": "https://picsum.photos/seed/rawbe-wed2/800/600",
       "caption": "Sample wedding photo.",
       "tags": ["wedding"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-06-02T12:00:00+00:00"
     },
     {
@@ -55,7 +55,7 @@
       "url": "https://picsum.photos/seed/rawbe-wed3/800/1000",
       "caption": "Sample wedding photo.",
       "tags": ["wedding"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-06-03T12:00:00+00:00"
     },
     {
@@ -63,7 +63,7 @@
       "url": "https://picsum.photos/seed/rawbe-wed4/800/800",
       "caption": "Sample wedding photo.",
       "tags": ["wedding"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-06-04T12:00:00+00:00"
     },
     {
@@ -71,7 +71,7 @@
       "url": "https://picsum.photos/seed/rawbe-wed5/800/1100",
       "caption": "Sample wedding photo.",
       "tags": ["wedding"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-06-05T12:00:00+00:00"
     },
     {
@@ -79,7 +79,7 @@
       "url": "https://picsum.photos/seed/rawbe-wed6/800/700",
       "caption": "Sample wedding photo.",
       "tags": ["wedding"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-06-06T12:00:00+00:00"
     },
     {
@@ -87,7 +87,7 @@
       "url": "https://picsum.photos/seed/rawbe-fam1/800/1000",
       "caption": "Sample family photo.",
       "tags": ["family"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-05-01T12:00:00+00:00"
     },
     {
@@ -95,7 +95,7 @@
       "url": "https://picsum.photos/seed/rawbe-fam2/800/800",
       "caption": "Sample family photo.",
       "tags": ["family"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-05-02T12:00:00+00:00"
     },
     {
@@ -103,7 +103,7 @@
       "url": "https://picsum.photos/seed/rawbe-fam3/800/600",
       "caption": "Sample family photo.",
       "tags": ["family"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-05-03T12:00:00+00:00"
     },
     {
@@ -111,7 +111,7 @@
       "url": "https://picsum.photos/seed/rawbe-fam4/800/1200",
       "caption": "Sample family photo.",
       "tags": ["family"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-05-04T12:00:00+00:00"
     },
     {
@@ -119,7 +119,7 @@
       "url": "https://picsum.photos/seed/rawbe-port1/800/1100",
       "caption": "Sample portrait photo.",
       "tags": ["portrait"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-04-01T12:00:00+00:00"
     },
     {
@@ -127,7 +127,7 @@
       "url": "https://picsum.photos/seed/rawbe-port2/800/800",
       "caption": "Sample portrait photo.",
       "tags": ["portrait"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-04-02T12:00:00+00:00"
     },
     {
@@ -135,7 +135,7 @@
       "url": "https://picsum.photos/seed/rawbe-port3/800/950",
       "caption": "Sample portrait photo.",
       "tags": ["portrait"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-04-03T12:00:00+00:00"
     },
     {
@@ -143,7 +143,7 @@
       "url": "https://picsum.photos/seed/rawbe-port4/800/650",
       "caption": "Sample portrait photo.",
       "tags": ["portrait"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-04-04T12:00:00+00:00"
     },
     {
@@ -151,7 +151,7 @@
       "url": "https://picsum.photos/seed/rawbe-mat1/800/1050",
       "caption": "Sample maternity photo.",
       "tags": ["maternity"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-03-01T12:00:00+00:00"
     },
     {
@@ -159,7 +159,7 @@
       "url": "https://picsum.photos/seed/rawbe-mat2/800/750",
       "caption": "Sample maternity photo.",
       "tags": ["maternity"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-03-02T12:00:00+00:00"
     },
     {
@@ -167,7 +167,7 @@
       "url": "https://picsum.photos/seed/rawbe-mat3/800/1150",
       "caption": "Sample maternity photo.",
       "tags": ["maternity"],
-      "permalink": "https://www.instagram.com/rawbe_photography_llc/",
+      "permalink": "",
       "timestamp": "2026-03-03T12:00:00+00:00"
     }
   ]

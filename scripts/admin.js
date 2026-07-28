@@ -180,6 +180,7 @@ function setSigner(newSigner, persist) {
     match.className = "banner banner-ok";
     match.textContent = "This key matches the configured creator key. Uploads will appear on the site.";
     $("drop-card").hidden = false;
+    $("manage-card").hidden = false;
   } else {
     match.className = "banner banner-err";
     match.textContent =
@@ -250,9 +251,13 @@ function logout() {
   localStorage.removeItem(METHOD_STORAGE_KEY);
   signer = null;
   secretKey = null;
+  publishedPhotos = [];
   $("signer-options").hidden = false;
   $("identity-status").hidden = true;
   $("drop-card").hidden = true;
+  $("manage-card").hidden = true;
+  $("photos-list").textContent = "";
+  $("photos-count").textContent = "";
   log("Signed out.");
   updatePublishButton();
 }
@@ -612,6 +617,214 @@ function clearDone() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Manage published photos (NIP-09 deletion)                          */
+/* ------------------------------------------------------------------ */
+
+var PHOTO_EVENT_KIND = 1063;
+var DELETE_EVENT_KIND = 5;
+var QUERY_MAX_WAIT_MS = 20000;
+
+var publishedPhotos = []; // { id, url, caption, tags, sha, event }
+
+function tagValues(event, name) {
+  return event.tags.filter(function (t) {
+    return t[0] === name && t[1];
+  }).map(function (t) {
+    return t[1];
+  });
+}
+
+/** Fetch the creator's published kind-1063 photo events from relays. */
+function fetchPublishedPhotos() {
+  if (!signer || !config) {
+    log("Sign in first to load published photos.");
+    return Promise.resolve([]);
+  }
+  if (!config.creatorPubkeyHex) {
+    log("Creator pubkey not configured — cannot load photos.");
+    return Promise.resolve([]);
+  }
+
+  log("Fetching published photos from relays…");
+  $("load-photos").disabled = true;
+  $("photos-count").textContent = "loading…";
+
+  return pool
+    .querySync(
+      config.relays,
+      { kinds: [PHOTO_EVENT_KIND], authors: [config.creatorPubkeyHex] },
+      { maxWait: QUERY_MAX_WAIT_MS }
+    )
+    .then(function (events) {
+      // Dedupe by hash (same photo re-published = edit, keep newest)
+      var byHash = new Map();
+      events.forEach(function (event) {
+        var sha = tagValues(event, "x")[0];
+        if (!sha) return;
+        var prev = byHash.get(sha);
+        if (!prev || event.created_at > prev.created_at) byHash.set(sha, event);
+      });
+
+      publishedPhotos = Array.from(byHash.values())
+        .map(function (event) {
+          var urls = tagValues(event, "url");
+          var sha = tagValues(event, "x")[0];
+          return {
+            id: event.id,
+            url: urls[0] || "",
+            caption: event.content || "",
+            tags: tagValues(event, "t"),
+            sha: sha,
+            event: event,
+          };
+        })
+        .filter(function (p) {
+          return p.url;
+        })
+        .sort(function (a, b) {
+          return b.event.created_at - a.event.created_at;
+        });
+
+      log("Loaded " + publishedPhotos.length + " published photo" + (publishedPhotos.length === 1 ? "" : "s") + ".");
+      renderPhotosList();
+      return publishedPhotos;
+    })
+    .catch(function (err) {
+      log("Failed to load photos: " + err.message);
+      $("photos-count").textContent = "failed to load";
+      return [];
+    })
+    .finally(function () {
+      $("load-photos").disabled = false;
+    });
+}
+
+/** Render the list of published photos with delete buttons. */
+function renderPhotosList() {
+  var wrap = $("photos-list");
+  wrap.textContent = "";
+  $("photos-count").textContent = publishedPhotos.length
+    ? publishedPhotos.length + " photo" + (publishedPhotos.length === 1 ? "" : "s") + " published"
+    : "no published photos";
+
+  publishedPhotos.forEach(function (photo) {
+    var row = document.createElement("div");
+    row.className = "photo-row";
+    row.dataset.eventId = photo.id;
+
+    var thumb = document.createElement("img");
+    thumb.src = photo.url;
+    thumb.alt = photo.caption || "Published photo";
+    thumb.loading = "lazy";
+    row.appendChild(thumb);
+
+    var meta = document.createElement("div");
+    meta.className = "photo-meta";
+
+    var caption = document.createElement("div");
+    caption.className = "photo-caption";
+    caption.textContent = photo.caption || "(no caption)";
+    meta.appendChild(caption);
+
+    var info = document.createElement("div");
+    info.className = "photo-info";
+    var sectionTag = photo.tags.find(function (t) {
+      return (config.sections || []).some(function (s) {
+        return s.tag === t;
+      });
+    });
+    info.textContent = (sectionTag || photo.tags[0] || "untagged") + " · " +
+      new Date(photo.event.created_at * 1000).toLocaleDateString();
+    meta.appendChild(info);
+
+    row.appendChild(meta);
+
+    var actions = document.createElement("div");
+    actions.className = "photo-actions";
+
+    var deleteBtn = document.createElement("button");
+    deleteBtn.className = "btn btn-small btn-danger";
+    deleteBtn.type = "button";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.addEventListener("click", function () {
+      deletePhoto(photo, row);
+    });
+    actions.appendChild(deleteBtn);
+
+    row.appendChild(actions);
+    wrap.appendChild(row);
+  });
+}
+
+/**
+ * Delete a published photo via NIP-09 (kind-5 deletion request).
+ * Relays that honor NIP-09 will remove the referenced event.
+ */
+function deletePhoto(photo, rowEl) {
+  if (!signer) {
+    alert("Sign in first to delete photos.");
+    return;
+  }
+  if (signer.pubkeyHex !== config.creatorPubkeyHex) {
+    alert("Only the creator key can delete photos.");
+    return;
+  }
+
+  var label = photo.caption || photo.url.slice(-40);
+  if (!confirm("Delete this photo?\n\n" + label + "\n\nThis publishes a deletion request to the relays. The photo will disappear from the site after the next sync.")) {
+    return;
+  }
+
+  rowEl.classList.add("deleting");
+  var btn = rowEl.querySelector("button");
+  btn.disabled = true;
+  btn.textContent = "Deleting…";
+  log("Deleting " + label + "…");
+
+  var now = Math.floor(Date.now() / 1000);
+  var deleteEvent = {
+    kind: DELETE_EVENT_KIND,
+    created_at: now,
+    tags: [
+      ["e", photo.id],
+      ["k", String(PHOTO_EVENT_KIND)],
+    ],
+    content: "Deleted via RawBe Photography admin panel",
+  };
+
+  signer
+    .signEvent(deleteEvent)
+    .then(function (signed) {
+      var publications = pool.publish(config.relays, signed);
+      return Promise.race([
+        Promise.any(publications),
+        new Promise(function (_, reject) {
+          setTimeout(function () {
+            reject(new Error("relay publish timed out"));
+          }, PUBLISH_TIMEOUT_MS);
+        }),
+      ]);
+    })
+    .then(function () {
+      log("Deleted " + label + " — removal appears on the site after the next sync.");
+      // Remove from local list and re-render
+      publishedPhotos = publishedPhotos.filter(function (p) {
+        return p.id !== photo.id;
+      });
+      rowEl.remove();
+      $("photos-count").textContent = publishedPhotos.length
+        ? publishedPhotos.length + " photo" + (publishedPhotos.length === 1 ? "" : "s") + " published"
+        : "no published photos";
+    })
+    .catch(function (err) {
+      log("Failed to delete " + label + ": " + err.message);
+      rowEl.classList.remove("deleting");
+      btn.disabled = false;
+      btn.textContent = "Delete";
+    });
+}
+
+/* ------------------------------------------------------------------ */
 /* Boot                                                                */
 /* ------------------------------------------------------------------ */
 
@@ -622,6 +835,7 @@ $("nip07-login").addEventListener("click", function () {
 $("logout").addEventListener("click", logout);
 $("publish-all").addEventListener("click", publishAll);
 $("clear-done").addEventListener("click", clearDone);
+$("load-photos").addEventListener("click", fetchPublishedPhotos);
 
 if (window.nostr) $("nip07-login").hidden = false;
 

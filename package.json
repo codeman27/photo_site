@@ -10,7 +10,6 @@
   "scripts": {
     "sync": "node scripts/sync-nostr.js",
     "sync:check": "node scripts/sync-nostr.js --dry-run",
-    "sync:ig": "node scripts/sync.js",
     "serve": "python3 -m http.server 8080"
   },
   "dependencies": {

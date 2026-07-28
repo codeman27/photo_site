@@ -284,6 +284,80 @@ code {
   gap: 0.75rem;
 }
 
+/* ---------- Manage published photos ---------- */
+
+.manage-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.photos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.photo-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #181818;
+}
+
+.photo-row.deleting {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.photo-row img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.photo-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.photo-caption {
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photo-info {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-danger {
+  border-color: var(--err);
+  color: var(--err);
+}
+
+.btn-danger:hover {
+  background: var(--err);
+  border-color: var(--err);
+  color: #fff;
+}
+
 /* ---------- Log ---------- */
 
 .log {
