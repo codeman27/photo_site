@@ -1,0 +1,22 @@
+{
+  "pubkey": "npub1yevnw7wrckwqg7cprq8unm4faaypy75xmg7e3lszaq88yyqtr4ns4d538k",
+  "relays": [
+    "wss://relay.damus.io",
+    "wss://nos.lol",
+    "wss://relay.primal.net",
+    "wss://nostr.mom",
+    "wss://relay.nostr.band"
+  ],
+  "blossomServers": [
+    "https://blossom.primal.net",
+    "https://cdn.satellite.earth",
+    "https://24242.io"
+  ],
+  "sections": [
+    { "tag": "portfolio-carousel", "title": "Hero Carousel" },
+    { "tag": "wedding", "title": "Weddings" },
+    { "tag": "family", "title": "Family" },
+    { "tag": "portrait", "title": "Portraits" },
+    { "tag": "maternity", "title": "Maternity" }
+  ]
+}

@@ -19,9 +19,11 @@
   var CAROUSEL_TAG = "portfolio-carousel";
   var CAROUSEL_INTERVAL_MS = 5000;
 
-  // Gallery sections: posts are assigned to a section when their caption
-  // contains the matching hashtag. Add a row here to add a section.
-  var GALLERY_SECTIONS = [
+  // Fallback gallery sections, used only if data/nostr.json can't be loaded.
+  // The live section list comes from data/nostr.json ("sections") so the
+  // upload page and the renderer share one source of truth; the carousel
+  // section (CAROUSEL_TAG) is excluded from the gallery grid.
+  var DEFAULT_GALLERY_SECTIONS = [
     { tag: "wedding", title: "Weddings" },
     { tag: "family", title: "Family" },
     { tag: "portrait", title: "Portraits" },
@@ -74,6 +76,32 @@
     return caption.length > 120 ? caption.slice(0, 117) + "..." : caption;
   }
 
+  /** Section list shared with the upload page (data/nostr.json is the source of truth). */
+  function deriveSections(nostrConfig) {
+    var sections = nostrConfig && nostrConfig.sections;
+    if (!sections || !sections.length) return DEFAULT_GALLERY_SECTIONS;
+    return sections
+      .filter(function (s) {
+        return s.tag && s.tag !== CAROUSEL_TAG;
+      })
+      .map(function (s) {
+        return { tag: s.tag, title: s.title || s.tag };
+      });
+  }
+
+  /**
+   * If an image URL dies (e.g. a Blossom server goes down), retry the post's
+   * mirrored copies on other servers, in order.
+   */
+  function attachMirrorFallback(img, post) {
+    var fallbacks = (post.mirrors || []).slice();
+    if (!fallbacks.length) return;
+    img.addEventListener("error", function () {
+      var next = fallbacks.shift();
+      if (next && img.src !== next) img.src = next;
+    });
+  }
+
   /* ------------------------------------------------------------------ */
   /* Hero carousel                                                       */
   /* ------------------------------------------------------------------ */
@@ -102,6 +130,7 @@
       var img = document.createElement("img");
       img.src = post.url;
       img.alt = altText(post);
+      attachMirrorFallback(img, post);
       if (i > 0) img.loading = "lazy";
       slide.appendChild(img);
       track.appendChild(slide);
@@ -194,6 +223,7 @@
     caption: document.querySelector(".lightbox-caption"),
     posts: [],
     index: 0,
+    fallbacks: [],
 
     open: function (posts, i) {
       this.posts = posts;
@@ -204,6 +234,7 @@
     show: function (i) {
       this.index = (i + this.posts.length) % this.posts.length;
       var post = this.posts[this.index];
+      this.fallbacks = (post.mirrors || []).slice();
       this.img.src = post.url;
       this.img.alt = altText(post);
       this.caption.textContent = altText(post);
@@ -216,6 +247,10 @@
   };
 
   function initLightbox() {
+    lightbox.img.addEventListener("error", function () {
+      var next = lightbox.fallbacks.shift();
+      if (next && lightbox.img.src !== next) lightbox.img.src = next;
+    });
     document.querySelector(".lightbox-close").addEventListener("click", function () {
       lightbox.close();
     });
@@ -236,10 +271,10 @@
     });
   }
 
-  function renderGalleries(posts) {
+  function renderGalleries(posts, sections) {
     var container = document.getElementById("portfolio");
 
-    GALLERY_SECTIONS.forEach(function (section) {
+    sections.forEach(function (section) {
       var sectionPosts = postsWithTag(posts, section.tag);
       if (!sectionPosts.length) return; // hide empty sections entirely
 
@@ -261,6 +296,7 @@
         var img = document.createElement("img");
         img.src = post.url;
         img.alt = altText(post);
+        attachMirrorFallback(img, post);
         img.loading = "lazy";
         figure.appendChild(img);
         figure.addEventListener("click", function () {
@@ -333,11 +369,19 @@
   initLightbox();
   document.getElementById("footer-year").textContent = new Date().getFullYear();
 
+  // data/nostr.json is optional for rendering: if it's missing or invalid we
+  // fall back to the default sections so the site keeps working.
+  var nostrConfigPromise = fetchJson("data/nostr.json").catch(function () {
+    return null;
+  });
+
   fetchJson("data/images.json")
     .then(function (data) {
       var posts = data.posts || [];
-      initCarousel(postsWithTag(posts, CAROUSEL_TAG));
-      renderGalleries(posts);
+      return nostrConfigPromise.then(function (nostrConfig) {
+        initCarousel(postsWithTag(posts, CAROUSEL_TAG));
+        renderGalleries(posts, deriveSections(nostrConfig));
+      });
     })
     .catch(function (err) {
       console.warn(err.message);
