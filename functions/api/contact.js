@@ -1,17 +1,22 @@
 /**
  * Contact form handler — Cloudflare Pages Function.
  *
- * Receives the contact form POST at /api/contact, validates the input, and
- * forwards the message to the site owner via MailChannels (free with
- * Cloudflare Pages/Workers — no account or API key needed).
+ * Uses Cloudflare's native Email Service (env.EMAIL.send()) — no third-party
+ * service or API key required beyond the send_email binding in wrangler.toml.
  *
- * Env vars (Cloudflare Pages dashboard -> Settings -> Environment variables):
- *   CONTACT_EMAIL  (required) — where messages are delivered
- *   FROM_EMAIL     (optional) — sender address on the outgoing email
+ * One-time setup:
+ *   1. Onboard your domain at Cloudflare dash → Email Sending → Onboard Domain.
+ *      Cloudflare will auto-add SPF/DKIM/DMARC records.
+ *   2. Update FROM_DOMAIN below to that domain.
+ *   3. Deploy: npx wrangler pages deploy .
  *
- * Spam protection: a hidden "website" honeypot field. Humans never see it,
- * bots fill it in, and those submissions are silently accepted (and dropped).
+ * Spam protection: a hidden "website" honeypot field silently drops bots.
  */
+
+// ── Update these two constants before deploying ──────────────────────────────
+const FROM_DOMAIN = "rawbephotography.com"; // must be onboarded in Cloudflare Email Sending
+const CONTACT_EMAIL = "rawbephotography970@gmail.com"; // where form submissions are delivered
+// ─────────────────────────────────────────────────────────────────────────────
 
 const MAX_NAME = 100;
 const MAX_EMAIL = 200;
@@ -31,10 +36,18 @@ function respond(request, payload, status) {
   return Response.redirect(new URL("/?contact=" + target + "#contact", request.url), 303);
 }
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  if (!env.CONTACT_EMAIL) {
+  if (!env.EMAIL) {
     return respond(request, { ok: false, error: "The contact form is not configured yet." }, 500);
   }
 
@@ -67,8 +80,8 @@ export async function onRequestPost(context) {
     return respond(request, { ok: false, error: "One of the fields is too long." }, 400);
   }
 
-  const subject = "Contact form: " + (sessionType || "general") + " inquiry from " + name;
-  const text = [
+  const subject = "New inquiry: " + (sessionType || "general") + " \u2014 " + name;
+  const textBody = [
     "Name: " + name,
     "Email: " + email,
     "Session type: " + (sessionType || "(not specified)"),
@@ -76,24 +89,24 @@ export async function onRequestPost(context) {
     "Message:",
     message,
   ].join("\n");
+  const htmlBody = `<h2>New Contact Form Submission</h2>
+<p><strong>Name:</strong> ${escapeHtml(name)}</p>
+<p><strong>Email:</strong> ${escapeHtml(email)}</p>
+<p><strong>Session type:</strong> ${escapeHtml(sessionType || "(not specified)")}</p>
+<p><strong>Message:</strong></p>
+<p style="white-space:pre-wrap">${escapeHtml(message)}</p>`;
 
-  const mail = await fetch("https://api.mailchannels.net/tx/v1/send", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: env.CONTACT_EMAIL }] }],
-      from: {
-        email: env.FROM_EMAIL || "contact-form@rawbephotography.com",
-        name: "RawBe Photography website",
-      },
-      reply_to: { email: email, name: name },
+  try {
+    await env.EMAIL.send({
+      to: CONTACT_EMAIL,
+      from: "Contact Form <forms@" + FROM_DOMAIN + ">",
+      reply_to: email,
       subject: subject,
-      content: [{ type: "text/plain", value: text }],
-    }),
-  });
-
-  if (!mail.ok) {
-    return respond(request, { ok: false, error: "Message failed to send — please try again." }, 502);
+      text: textBody,
+      html: htmlBody,
+    });
+  } catch (err) {
+    return respond(request, { ok: false, error: "Message failed to send \u2014 please try again." }, 502);
   }
 
   return respond(request, { ok: true }, 200);

@@ -2,45 +2,52 @@
   "note": "Edit this file to update pricing. Changes deploy with the site.",
   "packages": [
     {
-      "name": "Mini Session",
-      "price": "$150",
-      "description": "A quick, fun session perfect for updated portraits or small families.",
+      "name": "Tier 1 \u2014 In and Out",
+      "price": "$750",
+      "description": "A focused session capturing your most important moments.",
       "features": [
-        "30-minute session",
-        "1 location",
-        "15 edited digital images",
-        "Online gallery delivery",
-        "Print release"
+        "3 \u2013 4 Hours",
+        "Special Moments (getting ready, ceremony highlights, family & group, candid moments)"
       ],
       "highlighted": false
     },
     {
-      "name": "Full Session",
-      "price": "$300",
-      "description": "The complete experience for families, maternity, engagements, or portraits.",
+      "name": "Tier 2 \u2014 Just Right",
+      "price": "$1,200",
+      "description": "Ideal coverage for most ceremonies and receptions.",
       "features": [
-        "60-minute session",
-        "Up to 2 locations",
-        "40 edited digital images",
-        "Online gallery delivery",
-        "Print release",
-        "Outfit change included"
+        "6 \u2013 8 Hours"
       ],
       "highlighted": true
     },
     {
-      "name": "Wedding",
-      "price": "From $1,800",
-      "description": "Full-day coverage of your big day, from getting ready to the last dance.",
+      "name": "Tier 3 \u2014 All Day",
+      "price": "$2,000",
+      "description": "Complete all-day coverage from start to finish.",
       "features": [
-        "Up to 8 hours of coverage",
-        "Second shooter available",
-        "400+ edited digital images",
-        "Engagement session included",
-        "Online gallery delivery",
-        "Print release"
+        "Engagement Session",
+        "All Day Coverage",
+        "Hair & Make up until Reception ends / Couple Leave",
+        "Special Moments (getting ready, ceremony highlights, family & group, candid moments)"
       ],
       "highlighted": false
+    }
+  ],
+  "additionalServices": [
+    {
+      "name": "Engagements",
+      "price": "$400",
+      "icon": "rings"
+    },
+    {
+      "name": "Family",
+      "price": "$300",
+      "icon": "family"
+    },
+    {
+      "name": "Performing Arts",
+      "price": "$250",
+      "icon": "microphone"
     }
   ]
 }

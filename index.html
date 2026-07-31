@@ -10,17 +10,7 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="images/og-image.jpg">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23222'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23fff'/%3E%3C/svg%3E">
-  <!-- Theme stylesheet: scripts/main.js swaps href between styles/classic/main.css and styles/punk/main.css -->
-  <link id="theme-stylesheet" rel="stylesheet" href="styles/classic/main.css">
-  <script>
-    // Apply the saved theme before first paint to avoid a flash of the wrong theme.
-    (function () {
-      var saved = localStorage.getItem("rawbe-theme");
-      if (saved === "punk") {
-        document.getElementById("theme-stylesheet").href = "styles/punk/main.css";
-      }
-    })();
-  </script>
+  <link rel="stylesheet" href="styles/classic/main.css">
   <script src="scripts/main.js" defer></script>
 </head>
 <body>
@@ -33,9 +23,7 @@
       <a href="#pricing">Pricing</a>
       <a href="#contact">Contact</a>
     </nav>
-    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch color theme">
-      <span class="theme-toggle-label">Punk Mode</span>
-    </button>
+
   </header>
 
   <main id="top">
@@ -61,7 +49,10 @@
     <section id="pricing" class="pricing">
       <h2 class="section-title">Pricing</h2>
       <p class="section-subtitle">Every session includes a consultation to plan your perfect shoot.</p>
+      <p class="pricing-note">10% deposit required to reserve your date.</p>
       <div id="pricing-grid" class="pricing-grid"></div>
+      <h3 class="section-subtitle pricing-additional-title">Additional Services</h3>
+      <div id="additional-services-grid" class="pricing-grid"></div>
       <p class="pricing-note">Custom packages available — just ask.</p>
     </section>
 
@@ -69,7 +60,17 @@
     <section id="contact" class="contact">
       <h2 class="section-title">Get in Touch</h2>
       <p class="section-subtitle">Tell me about your day, your family, or your idea — let's make something real.</p>
-      <form id="contact-form" class="contact-form" action="/api/contact" method="POST">
+      <div class="contact-info">
+        <a class="contact-info-item" href="tel:+19707736908">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.63a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 2 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>(970) 773-6908</span>
+        </a>
+        <a class="contact-info-item" href="mailto:rawbephotography970@gmail.com">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+          <span>rawbephotography970@gmail.com</span>
+        </a>
+      </div>
+      <form id="contact-form" class="contact-form" action="mailto:rawbephotography970@gmail.com" method="GET" enctype="text/plain">
         <div class="form-honeypot" aria-hidden="true">
           <label for="contact-website">Website</label>
           <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
@@ -86,9 +87,9 @@
           <label for="contact-type">Session Type</label>
           <select id="contact-type" name="session_type">
             <option value="wedding">Wedding</option>
+            <option value="engagements">Engagements</option>
             <option value="family">Family</option>
-            <option value="portrait">Portrait</option>
-            <option value="maternity">Maternity</option>
+            <option value="performing-arts">Performing Arts</option>
             <option value="other">Other</option>
           </select>
         </div>
