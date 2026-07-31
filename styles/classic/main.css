@@ -418,13 +418,63 @@ img {
 }
 
 .pricing-note {
-  margin: 2rem 0 0;
+  margin: 2rem 0 2rem;
   color: var(--color-text-muted);
   text-align: center;
   font-style: italic;
 }
 
+.pricing-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.pricing-icon svg {
+  width: 3.5rem;
+  height: 3.5rem;
+  color: var(--color-accent);
+}
+
+.pricing-additional-title {
+  margin-top: 3rem;
+  font-family: var(--font-heading);
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  font-weight: normal;
+  color: var(--color-text);
+}
+
 /* ---------- Contact ---------- */
+
+.contact-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 2.5rem;
+  margin: 0 auto 2.5rem;
+}
+
+.contact-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.contact-info-item:hover {
+  color: var(--color-accent);
+}
+
+.contact-info-item svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
 
 .contact-form {
   max-width: 34rem;

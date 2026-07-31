@@ -9,15 +9,14 @@
   /* Config                                                              */
   /* ------------------------------------------------------------------ */
 
-  var THEMES = {
-    classic: "styles/classic/main.css",
-    punk: "styles/punk/main.css",
-  };
-  var THEME_STORAGE_KEY = "rawbe-theme";
-  var DEFAULT_THEME = "classic";
-
   var CAROUSEL_TAG = "portfolio-carousel";
   var CAROUSEL_INTERVAL_MS = 5000;
+
+  var ICONS = {
+    rings: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 28" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="18" cy="14" r="12"/><circle cx="38" cy="14" r="12"/></svg>',
+    family: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="3"/><circle cx="14" cy="18" r="5"/><path d="M4 44c0-8 10-10 10-10s10 2 10 10"/><circle cx="34" cy="18" r="5"/><path d="M24 44c0-8 10-10 10-10s10 2 10 10"/></svg>',
+    microphone: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 52" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="1" width="14" height="24" rx="7"/><path d="M4 24a12 12 0 0 0 24 0"/><line x1="16" y1="36" x2="16" y2="48"/><line x1="10" y1="48" x2="22" y2="48"/></svg>',
+  };
 
   // Fallback gallery sections, used only if data/nostr.json can't be loaded.
   // The live section list comes from data/nostr.json ("sections") so the
@@ -29,29 +28,6 @@
     { tag: "portrait", title: "Portraits" },
     { tag: "maternity", title: "Maternity" },
   ];
-
-  /* ------------------------------------------------------------------ */
-  /* Theme toggle                                                        */
-  /* ------------------------------------------------------------------ */
-
-  function currentTheme() {
-    return localStorage.getItem(THEME_STORAGE_KEY) === "punk" ? "punk" : DEFAULT_THEME;
-  }
-
-  function applyTheme(theme) {
-    var link = document.getElementById("theme-stylesheet");
-    link.href = THEMES[theme] || THEMES[DEFAULT_THEME];
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-    var label = document.querySelector(".theme-toggle-label");
-    if (label) label.textContent = theme === "punk" ? "Classic Mode" : "Punk Mode";
-  }
-
-  function initThemeToggle() {
-    applyTheme(currentTheme());
-    document.getElementById("theme-toggle").addEventListener("click", function () {
-      applyTheme(currentTheme() === "punk" ? "classic" : "punk");
-    });
-  }
 
   /* ------------------------------------------------------------------ */
   /* Data                                                                */
@@ -334,42 +310,59 @@
       status.classList.toggle("contact-status-err", !ok);
     }
 
-    // No-JS flow: the Pages Function redirects back with ?contact=success|error.
-    var result = new URLSearchParams(window.location.search).get("contact");
-    if (result === "success") {
-      showStatus("Message sent — thanks! I'll get back to you soon.", true);
-    } else if (result === "error") {
-      showStatus("Something went wrong — please try again.", false);
-    }
-
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Sending…";
 
-      fetch(form.action, {
-        method: "POST",
-        body: new FormData(form),
-        headers: { Accept: "application/json" },
-      })
-        .then(function (res) {
-          return res.json();
-        })
-        .then(function (data) {
-          if (data.ok) {
-            showStatus("Message sent — thanks! I'll get back to you soon.", true);
-            form.reset();
-          } else {
-            showStatus(data.error || "Something went wrong — please try again.", false);
-          }
-        })
-        .catch(function () {
-          showStatus("Network error — please try again.", false);
-        })
-        .finally(function () {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Send Message";
-        });
+      var name        = (form.querySelector('[name="name"]').value || "").trim();
+      var email       = (form.querySelector('[name="email"]').value || "").trim();
+      var sessionType = (form.querySelector('[name="session_type"]').value || "").trim();
+      var message     = (form.querySelector('[name="message"]').value || "").trim();
+      var honeypot    = (form.querySelector('[name="website"]').value || "").trim();
+
+      if (honeypot) return; // bot
+
+      var subject = "New inquiry: " + (sessionType || "general") + " \u2014 " + name;
+      var body = [
+        "Name: " + name,
+        "Email: " + email,
+        "Session type: " + (sessionType || "(not specified)"),
+        "",
+        "Message:",
+        message,
+      ].join("\n");
+
+      var mailtoUrl =
+        "mailto:rawbephotography970@gmail.com" +
+        "?subject=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(body);
+      var gmailUrl =
+        "https://mail.google.com/mail/?view=cm" +
+        "&to=" + encodeURIComponent("rawbephotography970@gmail.com") +
+        "&su=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(body);
+
+      var link = document.createElement("a");
+      link.href = mailtoUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // If the page still has focus after a short delay, no email client
+      // opened — fall back to Gmail in the browser.
+      setTimeout(function () {
+        if (document.hasFocus()) {
+          window.open(gmailUrl, "_blank", "noopener");
+          showStatus("Opening Gmail in a new tab\u2014just hit Send!", true);
+        } else {
+          showStatus("Your email client should be open and ready to send!", true);
+        }
+      }, 600);
+
+      showStatus("Your email client should open with the message ready to send!", true);
+      submitBtn.textContent = "Opening email\u2026";
+      setTimeout(function () {
+        submitBtn.textContent = "Send Message";
+      }, 3000);
     });
   }
 
@@ -393,10 +386,12 @@
       price.textContent = pkg.price;
       card.appendChild(price);
 
-      var desc = document.createElement("p");
-      desc.className = "pricing-description";
-      desc.textContent = pkg.description;
-      card.appendChild(desc);
+      if (pkg.description) {
+        var desc = document.createElement("p");
+        desc.className = "pricing-description";
+        desc.textContent = pkg.description;
+        card.appendChild(desc);
+      }
 
       var list = document.createElement("ul");
       list.className = "pricing-features";
@@ -410,18 +405,53 @@
       var cta = document.createElement("a");
       cta.className = "btn btn-secondary";
       cta.href = "#contact";
-      cta.textContent = "Book " + pkg.name;
+      cta.textContent = "Book Now";
       card.appendChild(cta);
 
       grid.appendChild(card);
     });
+
+    var additionalServices = data.additionalServices || [];
+    if (additionalServices.length) {
+      var addGrid = document.getElementById("additional-services-grid");
+      if (addGrid) {
+        additionalServices.forEach(function (svc) {
+          var card = document.createElement("article");
+          card.className = "pricing-card";
+
+          if (svc.icon && ICONS[svc.icon]) {
+            var iconEl = document.createElement("div");
+            iconEl.className = "pricing-icon";
+            iconEl.innerHTML = ICONS[svc.icon];
+            card.appendChild(iconEl);
+          }
+
+          var name = document.createElement("h3");
+          name.className = "pricing-name";
+          name.textContent = svc.name;
+          card.appendChild(name);
+
+          var price = document.createElement("p");
+          price.className = "pricing-price";
+          price.textContent = svc.price;
+          card.appendChild(price);
+
+          var cta = document.createElement("a");
+          cta.className = "btn btn-secondary";
+          cta.href = "#contact";
+          cta.textContent = "Book Now";
+          card.appendChild(cta);
+
+          addGrid.appendChild(card);
+        });
+      }
+    }
   }
 
   /* ------------------------------------------------------------------ */
   /* Boot                                                                */
   /* ------------------------------------------------------------------ */
 
-  initThemeToggle();
   initLightbox();
   initContactForm();
   document.getElementById("footer-year").textContent = new Date().getFullYear();
