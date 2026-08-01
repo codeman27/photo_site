@@ -29,6 +29,13 @@
     { tag: "music", title: "Music" },
   ];
 
+  // Maps old upload tags to their new section tags so previously-uploaded
+  // photos automatically appear in the renamed sections.
+  var TAG_ALIASES = {
+    wedding: "engagements",
+    maternity: "music",
+  };
+
   /* ------------------------------------------------------------------ */
   /* Data                                                                */
   /* ------------------------------------------------------------------ */
@@ -42,7 +49,12 @@
 
   function postsWithTag(posts, tag) {
     return posts.filter(function (p) {
-      return p.url && p.tags && p.tags.indexOf(tag) !== -1;
+      if (!p.url || !p.tags) return false;
+      if (p.tags.indexOf(tag) !== -1) return true;
+      // Also match posts whose tag is an alias for this section.
+      return p.tags.some(function (t) { return TAG_ALIASES[t] === tag; });
+    });
+  }
     });
   }
 
