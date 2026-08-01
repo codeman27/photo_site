@@ -14,9 +14,9 @@
   ],
   "sections": [
     { "tag": "portfolio-carousel", "title": "Hero Carousel" },
-    { "tag": "wedding", "title": "Weddings" },
+    { "tag": "engagements", "title": "Engagements" },
     { "tag": "family", "title": "Family" },
     { "tag": "portrait", "title": "Portraits" },
-    { "tag": "maternity", "title": "Maternity" }
+    { "tag": "music", "title": "Music" }
   ]
 }
