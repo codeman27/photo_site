@@ -391,6 +391,23 @@ img {
   text-align: center;
 }
 
+.portfolio-instagram {
+  text-align: center;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.portfolio-instagram-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.portfolio-instagram-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
 /* ---------- Pricing ---------- */
 
 .pricing-grid {
@@ -502,18 +519,6 @@ img {
   align-items: center;
   gap: 0.55rem;
   margin-top: 0.5rem;
-  padding: 0.6rem 1.4rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  color: var(--color-text-muted);
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s, border-color 0.2s;
-}
-
-.pricing-venmo:hover {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
 }
 
 .pricing-venmo svg {
