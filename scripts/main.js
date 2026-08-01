@@ -23,10 +23,10 @@
   // upload page and the renderer share one source of truth; the carousel
   // section (CAROUSEL_TAG) is excluded from the gallery grid.
   var DEFAULT_GALLERY_SECTIONS = [
-    { tag: "wedding", title: "Weddings" },
+    { tag: "engagements", title: "Engagements" },
     { tag: "family", title: "Family" },
     { tag: "portrait", title: "Portraits" },
-    { tag: "maternity", title: "Maternity" },
+    { tag: "music", title: "Music" },
   ];
 
   /* ------------------------------------------------------------------ */
@@ -293,6 +293,36 @@
     }
   }
 
+  function renderInstagramFeed(posts) {
+    var container = document.getElementById("instagram-grid");
+    if (!container) return;
+
+    var feedPosts = posts
+      .filter(function (p) { return p.url && p.tags && p.tags.indexOf(CAROUSEL_TAG) === -1; })
+      .sort(function (a, b) { return new Date(b.timestamp) - new Date(a.timestamp); })
+      .slice(0, 6);
+
+    if (!feedPosts.length) {
+      container.innerHTML = "<p class=\"galleries-empty\">No photos yet — check back soon.</p>";
+      return;
+    }
+
+    feedPosts.forEach(function (post, i) {
+      var figure = document.createElement("figure");
+      figure.className = "instagram-item";
+      var img = document.createElement("img");
+      img.src = post.url;
+      img.alt = altText(post);
+      attachMirrorFallback(img, post);
+      img.loading = "lazy";
+      figure.appendChild(img);
+      figure.addEventListener("click", function () {
+        lightbox.open(feedPosts, i);
+      });
+      container.appendChild(figure);
+    });
+  }
+
   /* ------------------------------------------------------------------ */
   /* Contact form                                                        */
   /* ------------------------------------------------------------------ */
@@ -468,6 +498,7 @@
       return nostrConfigPromise.then(function (nostrConfig) {
         initCarousel(postsWithTag(posts, CAROUSEL_TAG));
         renderGalleries(posts, deriveSections(nostrConfig));
+        renderInstagramFeed(posts);
       });
     })
     .catch(function (err) {
