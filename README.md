@@ -162,23 +162,21 @@ The daily sync workflow (`.github/workflows/sync.yml`) does three things in orde
    from Nostr relays.
 2. **Commit & push** — commits `data/images.json` to `main` **only when it
    changed**, and sets an internal `pushed` flag.
-3. **Deploy to Cloudflare Pages** — only when `pushed` is `true`, calls
-   `wrangler pages deploy` so the live site updates immediately instead of
-   waiting for Cloudflare's Git-integration polling.
+3. **Trigger Cloudflare Pages deploy** — only when `pushed` is `true`, POSTs to
+   a Cloudflare Pages deploy hook, firing the same native deployment that a PR
+   merge would trigger. No wrangler CLI or `wrangler.toml` involvement.
 
 Steps 1 and 2 need **no secrets** (reading public Nostr events is credential-free).
-Step 3 requires two repository secrets:
+Step 3 requires one repository secret:
 
 | Secret | Where to get it |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → **My Profile → API Tokens** → Create Token → *Cloudflare Pages: Edit* template (scope it to your account). |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → any zone or **Account Home** → right-hand sidebar (32-char hex string). |
+| `CLOUDFLARE_DEPLOY_HOOK` | Cloudflare Pages dashboard → your project → **Settings → Builds & deployments → Deploy hooks** → Add hook. Copy the full HTTPS URL. |
 
-Set both at **GitHub repo → Settings → Secrets and variables → Actions → New repository secret**.
+Set it at **GitHub repo → Settings → Secrets and variables → Actions → New repository secret**.
 
-If either secret is absent the deploy step will fail with a clear auth error;
-no-op syncs (nothing changed in Nostr) skip the deploy step entirely and succeed
-without the secrets.
+No-op syncs (nothing changed in Nostr) skip the deploy step entirely and need
+no secrets at all.
 
 ## Known risks / open items
 

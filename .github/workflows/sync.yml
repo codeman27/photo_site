@@ -6,14 +6,13 @@ name: Sync Nostr photos
 # Reading public Nostr events needs no credentials, so the sync step itself
 # has no required secrets.
 #
-# When a change is committed and pushed, this workflow also explicitly deploys
-# to Cloudflare Pages so the live site updates immediately rather than waiting
-# for Cloudflare's own Git integration to poll.
-# Required repository secrets for the Cloudflare deploy step:
-#   CLOUDFLARE_API_TOKEN  — a Cloudflare API token with "Cloudflare Pages: Edit"
-#                           permission (Settings → Secrets and variables → Actions)
-#   CLOUDFLARE_ACCOUNT_ID — your Cloudflare account ID (visible in the dashboard
-#                           sidebar URL or Account Home → right-hand panel)
+# When a change is committed and pushed, this workflow fires a Cloudflare Pages
+# Deploy Hook — a single POST to a secret URL that triggers the same native
+# deployment Cloudflare runs on a PR merge. No wrangler, no account IDs.
+#
+# Required repository secret:
+#   CLOUDFLARE_DEPLOY_HOOK — the full deploy hook URL from the Cloudflare Pages
+#     dashboard: Settings → Builds & deployments → Deploy hooks → Add hook.
 
 on:
   schedule:
@@ -63,13 +62,10 @@ jobs:
           git push
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      # Deploy to Cloudflare Pages only when data actually changed and was pushed.
-      # This ensures the live site reflects the sync immediately, without relying
-      # on Cloudflare's Git integration polling delay.
-      - name: Deploy to Cloudflare Pages
+      # Trigger Cloudflare Pages deploy only when data actually changed and was pushed.
+      # Posting to the deploy hook fires the same native Cloudflare deployment that
+      # a PR merge would trigger — no wrangler CLI or wrangler.toml needed.
+      - name: Trigger Cloudflare Pages deploy hook
         if: steps.commit.outputs.pushed == 'true'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy . --project-name=rawbe-photography --branch=main
+        run: |
+          curl --fail-with-body -X POST "${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}"
