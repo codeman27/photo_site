@@ -50,7 +50,3 @@ jobs:
           # A human push may have landed between checkout and push.
           git pull --rebase
           git push
-
-      - name: Trigger Cloudflare Pages deploy
-        if: success()
-        run: curl -X POST "${{ secrets.CF_DEPLOY_HOOK }}"
