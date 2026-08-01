@@ -55,8 +55,6 @@
       return p.tags.some(function (t) { return TAG_ALIASES[t] === tag; });
     });
   }
-    });
-  }
 
   function altText(post) {
     var caption = (post.caption || "").replace(/#[\p{L}\p{N}_]+/gu, "").trim();
@@ -88,6 +86,7 @@
       var next = fallbacks.shift();
       if (next && img.src !== next) img.src = next;
     });
+  }
 
   /**
    * Returns a Cloudflare Image Resizing URL so the browser downloads a
@@ -101,7 +100,6 @@
       return url; // cdn-cgi path not available locally
     }
     return "/cdn-cgi/image/width=" + width + ",quality=75,format=webp/" + url;
-  }
   }
 
   /* ------------------------------------------------------------------ */
