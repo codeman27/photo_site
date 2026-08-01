@@ -12,6 +12,11 @@
   var CAROUSEL_TAG = "portfolio-carousel";
   var CAROUSEL_INTERVAL_MS = 5000;
 
+  // Set to true once Cloudflare Image Resizing is enabled on your domain
+  // (Cloudflare dash → Speed → Optimization → Image Resizing).
+  // When false, images load at full resolution (safe default for all hosts).
+  var CLOUDFLARE_IMAGE_RESIZING = false;
+
   var ICONS = {
     rings: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 28" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="18" cy="14" r="12"/><circle cx="38" cy="14" r="12"/></svg>',
     family: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="3"/><circle cx="14" cy="18" r="5"/><path d="M4 44c0-8 10-10 10-10s10 2 10 10"/><circle cx="34" cy="18" r="5"/><path d="M24 44c0-8 10-10 10-10s10 2 10 10"/></svg>',
@@ -81,10 +86,17 @@
    */
   function attachMirrorFallback(img, post) {
     var fallbacks = (post.mirrors || []).slice();
-    if (!fallbacks.length) return;
+    var retried = false;
     img.addEventListener("error", function () {
       var next = fallbacks.shift();
-      if (next && img.src !== next) img.src = next;
+      if (next) {
+        img.src = next;
+      } else if (!retried) {
+        // All mirrors exhausted — wait 2 s then retry the original once.
+        // Handles transient rate-limiting from Blossom servers.
+        retried = true;
+        setTimeout(function () { img.src = post.url; }, 2000);
+      }
     });
   }
 
@@ -95,10 +107,7 @@
    * Automatically skips resizing on localhost so local dev still works.
    */
   function resizeUrl(url, width) {
-    if (!url) return url;
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      return url; // cdn-cgi path not available locally
-    }
+    if (!url || !CLOUDFLARE_IMAGE_RESIZING) return url;
     return "/cdn-cgi/image/width=" + width + ",quality=75,format=webp/" + url;
   }
 
