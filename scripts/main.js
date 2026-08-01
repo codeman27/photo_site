@@ -88,6 +88,20 @@
       var next = fallbacks.shift();
       if (next && img.src !== next) img.src = next;
     });
+
+  /**
+   * Returns a Cloudflare Image Resizing URL so the browser downloads a
+   * compressed thumbnail instead of the full-size original.
+   * Requires Image Resizing to be enabled in Cloudflare (Pro plan or add-on).
+   * Automatically skips resizing on localhost so local dev still works.
+   */
+  function resizeUrl(url, width) {
+    if (!url) return url;
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return url; // cdn-cgi path not available locally
+    }
+    return "/cdn-cgi/image/width=" + width + ",quality=75,format=webp/" + url;
+  }
   }
 
   /* ------------------------------------------------------------------ */
@@ -116,7 +130,7 @@
       var slide = document.createElement("div");
       slide.className = "carousel-slide" + (i === 0 ? " is-active" : "");
       var img = document.createElement("img");
-      img.src = post.url;
+      img.src = resizeUrl(post.url, 1400);
       img.alt = altText(post);
       attachMirrorFallback(img, post);
       if (i > 0) img.loading = "lazy";
@@ -282,7 +296,7 @@
         var figure = document.createElement("figure");
         figure.className = "masonry-item";
         var img = document.createElement("img");
-        img.src = post.url;
+        img.src = resizeUrl(post.url, 800);
         img.alt = altText(post);
         attachMirrorFallback(img, post);
         img.loading = "lazy";
@@ -323,7 +337,7 @@
       var figure = document.createElement("figure");
       figure.className = "instagram-item";
       var img = document.createElement("img");
-      img.src = post.url;
+      img.src = resizeUrl(post.url, 800);
       img.alt = altText(post);
       attachMirrorFallback(img, post);
       img.loading = "lazy";
