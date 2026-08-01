@@ -150,9 +150,35 @@ The upload page has its own theme-independent stylesheet (`styles/admin.css`).
 │   ├── classic/main.css        # default professional theme
 │   ├── punk/main.css           # punk/tattoo theme (same selectors)
 │   └── admin.css               # upload page styles (theme-independent)
-├── .github/workflows/sync.yml  # daily scheduled sync (no secrets)
+├── .github/workflows/sync.yml  # daily scheduled sync + Cloudflare deploy
 └── images/                     # static assets (og-image, etc.)
 ```
+
+## Sync workflow & Cloudflare deployment
+
+The daily sync workflow (`.github/workflows/sync.yml`) does three things in order:
+
+1. **Fetch** — runs `scripts/sync-nostr.js` to pull the latest kind-1063 events
+   from Nostr relays.
+2. **Commit & push** — commits `data/images.json` to `main` **only when it
+   changed**, and sets an internal `pushed` flag.
+3. **Deploy to Cloudflare Pages** — only when `pushed` is `true`, calls
+   `wrangler pages deploy` so the live site updates immediately instead of
+   waiting for Cloudflare's Git-integration polling.
+
+Steps 1 and 2 need **no secrets** (reading public Nostr events is credential-free).
+Step 3 requires two repository secrets:
+
+| Secret | Where to get it |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → **My Profile → API Tokens** → Create Token → *Cloudflare Pages: Edit* template (scope it to your account). |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → any zone or **Account Home** → right-hand sidebar (32-char hex string). |
+
+Set both at **GitHub repo → Settings → Secrets and variables → Actions → New repository secret**.
+
+If either secret is absent the deploy step will fail with a clear auth error;
+no-op syncs (nothing changed in Nostr) skip the deploy step entirely and succeed
+without the secrets.
 
 ## Known risks / open items
 
